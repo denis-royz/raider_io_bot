@@ -23,6 +23,23 @@ class RaiderIoService:
         with urlopen(request) as f:
             return f.read().decode('utf-8')
 
+    def get_mythic_affixes(self, region='eu', locale='en'):
+        """
+        :param region: Name of region to look up affixes for. Can be one of: us, eu, kr, tw
+        :param locale: Language to return name and description of affixes in.
+         Can be one of: en, ru, ko, cn, pt, it, fr, es, de, tw
+        :return: see https://raider.io/api#!/mythic95plus/get_api_v1_mythic_plus_affixes
+        """
+        params = {
+            'region': region,
+            'locale': locale
+        }
+        url_parts = urlencode(params)
+        request_url = self.base_url + 'mythic-plus/affixes?' + url_parts
+        request = Request(request_url, headers=self.headers, method='GET')
+        with urlopen(request) as f:
+            return f.read().decode('utf-8')
+
     def update(self, subscriptions):
         realms = []
         results = []

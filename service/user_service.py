@@ -20,7 +20,7 @@ class UserService:
     def create_schema(db, table_name, table_schema):
         table = Table(table_name, db)
         if len(table.info()) is 0:
-            table.create(table_schema)
+            table.create(*table_schema)
         else:
             table.open()
         return table

@@ -51,6 +51,14 @@ async def update(message: types.Message):
     await bot.send_message(message.chat.id, 'Subscriptions update scheduled. (Only eu-Gordunni server is supported)')
 
 
+@dp.message_handler(commands=['affix'])
+async def update(message: types.Message):
+    user_id = message.from_user.id
+    userService.authorize_or_create(telegram_id=user_id)
+    result = raiderIoService.get_mythic_affixes()
+    await bot.send_message(message.chat.id, result)
+
+
 @dp.message_handler(commands=['subscriptions', 'sub'])
 async def get_subscriptions(message: types.Message):
     user_id = message.from_user.id
