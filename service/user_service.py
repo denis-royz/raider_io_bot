@@ -4,22 +4,26 @@ from model.user import User
 
 class UserService:
 
+    user_schema = ('name', 'TEXT'), ('telegram_id', 'TEXT')
+    character_subscription_schema = ('user_name', 'TEXT'), ('region', 'TEXT'),\
+                                    ('realm', 'TEXT'), ('character_name', 'TEXT')
+
     def __init__(self):
         self.getByTelegramId = None
         self.db = Database("db/raider_io.db")
 
-        self.users_table = Table('users_table', self.db)
-        if len(self.users_table.info()) is 0:
-            self.users_table.create(('name', 'TEXT'), ('telegram_id', 'TEXT'))
-        else:
-            self.users_table.open()
+        self.users_table = self.create_schema(self.db, 'users_table', self.user_schema)
+        self.character_subscription_table = self.create_schema(self.db, 'character_subscription_table',
+                                                               self.character_subscription_schema)
 
-        self.subscription_table = Table('subscription_table', self.db)
-        if len(self.subscription_table.info()) is 0:
-            self.subscription_table.create(('user_name', 'TEXT'), ('region', 'TEXT'),
-                                           ('realm', 'TEXT'), ('character_name', 'TEXT'))
+    @staticmethod
+    def create_schema(db, table_name, table_schema):
+        table = Table(table_name, db)
+        if len(table.info()) is 0:
+            table.create(table_schema)
         else:
-            self.subscription_table.open()
+            table.open()
+        return table
 
     def insert(self, user):
         self.users_table.insert(name=user.name, telegram_id=user.telegram_id)
@@ -43,16 +47,16 @@ class UserService:
         return user
 
     def subscribe(self, user, region, realm, character_name):
-        records = self.subscription_table(user_name=user.name,
-                                          region=region, realm=realm, character_name=character_name)
+        records = self.character_subscription_table(user_name=user.name,
+                                                    region=region, realm=realm, character_name=character_name)
         if (len(records))is 0:
-            self.subscription_table.insert(user_name=user.name,
-                                           region=region, realm=realm, character_name=character_name)
+            self.character_subscription_table.insert(user_name=user.name,
+                                                     region=region, realm=realm, character_name=character_name)
             self.users_table.commit()
             return 1
         return 0
 
     def get_subscriptions(self, user):
-        return self.subscription_table(user_name=user.name)
+        return self.character_subscription_table(user_name=user.name)
 
 
