@@ -56,7 +56,18 @@ async def update(message: types.Message):
     user_id = message.from_user.id
     userService.authorize_or_create(telegram_id=user_id)
     result = raiderIoService.get_mythic_affixes()
-    await bot.send_message(message.chat.id, result)
+    template = 'Weekly Mythic Plus Affixes: {affix_1}, {affix_2}, {affix_3}%s' \
+               '\n(+4) {affix_1}\n{affix_1_desc}' \
+               '\n(+7) {affix_2}\n{affix_2_desc}' \
+               '\n(+10) {affix_3}\n{affix_3_desc}' \
+               '\nPowered by Raider.IO - Raid & Mythic Plus Rankings'
+    response_text = template.format(affix_1=result['affix_details'][0]['name'],
+                                    affix_2=result['affix_details'][1]['name'],
+                                    affix_3=result['affix_details'][2]['name'],
+                                    affix_1_desc=result['affix_details'][0]['description'],
+                                    affix_2_desc=result['affix_details'][1]['description'],
+                                    affix_3_desc=result['affix_details'][2]['description'])
+    await bot.send_message(message.chat.id, response_text)
 
 
 @dp.message_handler(commands=['subscriptions', 'sub'])

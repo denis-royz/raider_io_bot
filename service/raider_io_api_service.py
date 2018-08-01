@@ -1,6 +1,6 @@
 from urllib.request import Request, urlopen
 from urllib.parse import urlencode
-
+import json
 
 class RaiderIoService:
     headers = {
@@ -38,7 +38,7 @@ class RaiderIoService:
         request_url = self.base_url + 'mythic-plus/affixes?' + url_parts
         request = Request(request_url, headers=self.headers, method='GET')
         with urlopen(request) as f:
-            return f.read().decode('utf-8')
+            return json.loads(f.read().decode('utf-8'))
 
     def update(self, subscriptions):
         realms = []
