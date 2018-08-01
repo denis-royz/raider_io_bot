@@ -7,7 +7,9 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_polling
 from service.user_service import UserService
+from aiogram.types import ParseMode
 from service.raider_io_api_service import RaiderIoService
+from aiogram.utils.markdown import *
 
 
 API_TOKEN = config.get('api-token')
@@ -56,18 +58,23 @@ async def update(message: types.Message):
     user_id = message.from_user.id
     userService.authorize_or_create(telegram_id=user_id)
     result = raiderIoService.get_mythic_affixes()
-    template = 'Weekly Mythic Plus Affixes: {affix_1}, {affix_2}, {affix_3}%s' \
-               '\n(+4) {affix_1}\n{affix_1_desc}' \
-               '\n(+7) {affix_2}\n{affix_2_desc}' \
-               '\n(+10) {affix_3}\n{affix_3_desc}' \
-               '\nPowered by Raider.IO - Raid & Mythic Plus Rankings'
-    response_text = template.format(affix_1=result['affix_details'][0]['name'],
-                                    affix_2=result['affix_details'][1]['name'],
-                                    affix_3=result['affix_details'][2]['name'],
-                                    affix_1_desc=result['affix_details'][0]['description'],
-                                    affix_2_desc=result['affix_details'][1]['description'],
-                                    affix_3_desc=result['affix_details'][2]['description'])
-    await bot.send_message(message.chat.id, response_text)
+    affix_1 = result['affix_details'][0]['name']
+    affix_2 = result['affix_details'][1]['name']
+    affix_3 = result['affix_details'][2]['name']
+    affix_1_desc = result['affix_details'][0]['description']
+    affix_2_desc = result['affix_details'][1]['description']
+    affix_3_desc = result['affix_details'][2]['description']
+    response_text = text(
+        bold(result['title']),
+        bold('\n(+4) {affix_1}\n'.format(affix_1=affix_1)),
+        text(affix_1_desc),
+        bold('\n(+7) {affix_2}\n'.format(affix_2=affix_2)),
+        text(affix_2_desc),
+        bold('\n(+10) {affix_3}\n'.format(affix_3=affix_3)),
+        text(affix_3_desc),
+        text('\nPowered by Raider.IO - Raid & Mythic Plus Rankings')
+    )
+    await bot.send_message(message.chat.id, response_text, parse_mode=ParseMode.MARKDOWN)
 
 
 @dp.message_handler(commands=['subscriptions', 'sub'])
