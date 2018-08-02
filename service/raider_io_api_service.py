@@ -2,13 +2,14 @@ from urllib.request import Request, urlopen
 from urllib.parse import urlencode
 import json
 
+
 class RaiderIoService:
     headers = {
         "User-Agent": "Fiddler",
         "Host": "raider.io"
     }
 
-    def __init__(self):
+    def __init__(self, database_service):
         self.base_url = 'https://raider.io/api/v1/'
 
     def get_character_profile(self, realm, region, character):

@@ -10,6 +10,7 @@ from service.user_service import UserService
 from aiogram.types import ParseMode
 from service.raider_io_api_service import RaiderIoService
 from aiogram.utils.markdown import *
+from service.database_service import DatabaseService
 
 
 API_TOKEN = config.get('api-token')
@@ -19,8 +20,9 @@ logging.basicConfig(level=logging.INFO)
 loop = asyncio.get_event_loop()
 bot = Bot(token=API_TOKEN, loop=loop)
 dp = Dispatcher(bot)
-userService = UserService()
-raiderIoService = RaiderIoService()
+db_service = DatabaseService()
+userService = UserService(db_service)
+raiderIoService = RaiderIoService(db_service)
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -51,6 +53,19 @@ async def update(message: types.Message):
     subscriptions = userService.get_subscriptions(user)
     raiderIoService.update(subscriptions)
     await bot.send_message(message.chat.id, 'Subscriptions update scheduled. (Only eu-Gordunni server is supported)')
+
+
+@dp.message_handler(commands=['unsubscribe_all'])
+async def update(message: types.Message):
+    user_id = message.from_user.id
+    user = userService.authorize_or_create(telegram_id=user_id)
+    userService.unsubscribe_all(user)
+
+    subscriptions = userService.get_subscriptions(user)
+    response_text = 'You have {0} subscriptions'.format(len(subscriptions))
+    for sub in subscriptions:
+        response_text += '\n  Subscribed for {0}-{1}'.format(sub['character_name'], sub['realm'])
+    await bot.send_message(message.chat.id, response_text)
 
 
 @dp.message_handler(commands=['affix'])
